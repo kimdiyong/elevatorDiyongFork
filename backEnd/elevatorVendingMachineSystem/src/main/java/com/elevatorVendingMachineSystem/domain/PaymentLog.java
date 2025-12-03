@@ -46,10 +46,6 @@ public class PaymentLog {
     @Comment("에러 메시지 (실패 시)")
     private String errorMessage;
 
-    @CreatedDate
-    @Column(updatable = false)
-    private LocalDateTime paymentTime;
-
     @Builder
     public PaymentLog(Long productId, String productName, Integer amount,
                       PaymentMethod method, PaymentStatus status, String errorMessage) {

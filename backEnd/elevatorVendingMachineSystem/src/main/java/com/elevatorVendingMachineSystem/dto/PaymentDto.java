@@ -12,6 +12,7 @@ public class PaymentDto {
         private Long productId;      // 구매할 상품 ID
         private PaymentMethod method; // 결제 수단 (CARD, CASH)
         private Integer insertedAmount; // 투입 금액 (현금일 경우 필수)
+        private boolean needReceipt; //영수증 요청 여부 (true or false)
     }
 
     @Getter

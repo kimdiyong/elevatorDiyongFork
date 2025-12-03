@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -20,20 +21,69 @@ public class ProductService {
     /**
      * 상품 목록 조회 (SID-001, SID-019)
      * 사용자와 관리자 모두 사용합니다.
+     * UT-101 시험 케이스 대응: DB 상태에 따라 콘솔에 텍스트 출력
      */
     public List<ProductDto.Response> getAllProducts() {
-        return productRepository.findAll().stream()
-                .map(ProductDto.Response::new)
-                .collect(Collectors.toList());
+        try {
+            // 1. DB 조회 시도
+            List<Product> products = productRepository.findAll();
+
+            // 2. 데이터 유무 확인 및 텍스트 출력
+            if (!products.isEmpty()) {
+                System.out.println("======================");
+                System.out.println("Result: DB에 데이터 존재");  // UT-101-01
+                System.out.println("======================");
+            } else {
+                System.out.println("======================");
+                System.out.println("Result: DB에 데이터 없음");  // UT-101-02
+                System.out.println("======================");
+            }
+
+            return products.stream()
+                    .map(ProductDto.Response::new)
+                    .collect(Collectors.toList());
+
+        } catch (Exception e) {
+            // 3. DB 연결 실패 등 예외 발생 시 텍스트 출력
+            System.out.println("======================");
+            System.out.println("Result: DB 연결 실패");      // UT-101-03
+            System.out.println("Error Message: " + e.getMessage());
+            System.out.println("======================");
+
+            // 컨트롤러가 에러를 인지할 수 있도록 예외를 다시 던짐
+            throw e;
+        }
     }
 
     /**
      * 상품 상세 조회 (SID-003, SID-020)
      */
     public ProductDto.Response getProduct(Long id) {
-        Product product = productRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 상품이 존재하지 않습니다. id=" + id));
-        return new ProductDto.Response(product);
+        try {
+            // 1. DB 조회 시도
+            Optional<Product> productOpt = productRepository.findById(id);
+
+            // 2. 데이터 유무 확인 및 텍스트 출력
+            if (productOpt.isPresent()) {
+                System.out.println("======================");
+                System.out.println("Result: DB에 데이터 존재"); // UT-101-01 (상세)
+                System.out.println("======================");
+                return new ProductDto.Response(productOpt.get());
+            } else {
+                System.out.println("======================");
+                System.out.println("Result: DB에 데이터 없음"); // UT-101-02 (상세)
+                System.out.println("======================");
+                throw new IllegalArgumentException("해당 상품이 존재하지 않습니다. id=" + id);
+            }
+
+        } catch (IllegalArgumentException e) {
+            // 데이터 없음(404) 상황은 위에서 로그를 찍었으므로 그대로 던짐
+            throw e;
+        } catch (Exception e) {
+            // 3. 그 외 DB 연결 실패 등 예외 발생 시
+            printDbConnectionError(e);
+            throw e;
+        }
     }
 
     /**
@@ -85,5 +135,13 @@ public class ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 상품이 존재하지 않습니다. id=" + id));
         productRepository.delete(product);
+    }
+
+    // 공통 에러 출력 메서드
+    private void printDbConnectionError(Exception e) {
+        System.out.println("======================");
+        System.out.println("Result: DB 연결 실패");      // UT-101-03
+        System.out.println("Error Message: " + e.getMessage());
+        System.out.println("======================");
     }
 }
