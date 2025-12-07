@@ -15,6 +15,7 @@ import ResultPage from './pages/ResultPage';
 
 import AdminProductListPage from "./pages/AdminProductListPage";
 import AdminProductFormPage from "./pages/AdminProductFormPage";
+import AdminProductDetailPage from "./pages/AdminProductDetailPage";
 
 
 
@@ -32,6 +33,8 @@ const AppContent = () => {
         <Route path="/result" element={<ResultPage />} />
           <Route path="/adminList" element={<AdminProductListPage/>}/>
           <Route path="/adminForm" element={<AdminProductFormPage/>}/>
+          <Route path="/adminForm/:id" element={<AdminProductFormPage />} />
+          <Route path="/adminDetail/:id" element={<AdminProductDetailPage />} />
 
       </Routes>
   );
