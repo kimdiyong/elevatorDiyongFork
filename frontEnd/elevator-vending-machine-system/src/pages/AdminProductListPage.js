@@ -20,8 +20,10 @@ const AdminProductListPage = () => {
         }
     };
 
-    // 상품 삭제 핸들러
-    const handleDelete = async (id) => {
+    // 상품 삭제 핸들러 (이벤트 버블링 방지 필요)
+    const handleDelete = async (e, id) => {
+        e.stopPropagation(); // ⭐️ 중요: 카드 클릭 이벤트가 발생하지 않도록 막음
+
         if (window.confirm("정말로 이 상품을 삭제하시겠습니까?")) {
             try {
                 await client.delete(`/products/${id}`);
@@ -33,13 +35,19 @@ const AdminProductListPage = () => {
         }
     };
 
+    // 수정 페이지 이동 핸들러 (이벤트 버블링 방지)
+    const handleEdit = (e, id) => {
+        e.stopPropagation();
+        navigate(`/edit/${id}`); // 라우트 경로 주의 (/adminForm/:id 인지 /edit/:id 인지 App.js 확인)
+    };
+
     return (
         <div style={{ padding: '20px', backgroundColor: '#f4f4f4', minHeight: '100vh' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h2>상품 관리</h2>
                 <div>
                     <button
-                        onClick={() => navigate('/adminForm')}
+                        onClick={() => navigate('/create')} // 라우트 경로 주의 (/adminForm 인지 /create 인지 App.js 확인)
                         style={{ padding: '10px 20px', backgroundColor: '#2ecc71', color: 'white', border: 'none', borderRadius: '5px', marginRight: '10px', cursor: 'pointer' }}
                     >
                         + 신규 상품 등록
@@ -58,6 +66,8 @@ const AdminProductListPage = () => {
                 {products.map((product) => (
                     <div
                         key={product.id}
+                        // ⭐️ 카드 전체 클릭 시 상세 페이지로 이동
+                        onClick={() => navigate(`/adminDetail/${product.id}`)}
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -66,8 +76,12 @@ const AdminProductListPage = () => {
                             padding: '15px',
                             borderRadius: '8px',
                             border: '1px solid #ddd',
-                            boxShadow: '0 2px 5px rgba(0,0,0,0.05)'
+                            boxShadow: '0 2px 5px rgba(0,0,0,0.05)',
+                            cursor: 'pointer', // 클릭 가능하다는 표시
+                            transition: 'transform 0.1s', // 살짝 눌리는 효과
                         }}
+                        onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.01)'}
+                        onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                     >
                         {/* 왼쪽: 상품 정보 (이미지 + 이름 + 가격) */}
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flex: 2 }}>
@@ -83,7 +97,7 @@ const AdminProductListPage = () => {
                             </div>
                         </div>
 
-                        {/* 가운데: 재고 상태 (재고 부족 시 빨간색 강조) */}
+                        {/* 가운데: 재고 상태 */}
                         <div style={{ textAlign: 'center', flex: 1 }}>
                             <span style={{ display: 'block', fontSize: '0.8rem', color: '#666', marginBottom: '4px' }}>현재 재고</span>
                             <strong style={{ fontSize: '1.3rem', color: product.stock <= 2 ? '#e74c3c' : '#2980b9' }}>
@@ -94,13 +108,13 @@ const AdminProductListPage = () => {
                         {/* 오른쪽: 관리 버튼 (수정/삭제) */}
                         <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'flex-end' }}>
                             <button
-                                onClick={() => navigate(`/edit/${product.id}`)}
+                                onClick={(e) => handleEdit(e, product.id)}
                                 style={{ padding: '8px 15px', backgroundColor: '#3498db', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                             >
                                 수정
                             </button>
                             <button
-                                onClick={() => handleDelete(product.id)}
+                                onClick={(e) => handleDelete(e, product.id)}
                                 style={{ padding: '8px 15px', backgroundColor: '#e74c3c', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
                             >
                                 삭제

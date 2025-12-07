@@ -309,7 +309,7 @@ const AdminProductFormPage = () => {
 
                 {/* 하단 버튼 */}
                 <ButtonGroup>
-                    <button className="cancel" onClick={() => navigate('/admin/list')}>취소</button>
+                    <button className="cancel" onClick={() => navigate('/adminList')}>취소</button>
                     <button className="submit" onClick={handleSubmit}>{isEditMode ? "수정 완료" : "등록 완료"}</button>
                 </ButtonGroup>
             </FormContainer>
