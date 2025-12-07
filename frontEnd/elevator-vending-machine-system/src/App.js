@@ -1,25 +1,38 @@
-import logo from './logo.svg';
-import './App.css';
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { OrderProvider } from './context/OrderContext';
+import useIdleTimer from './hooks/useIdleTimer';
 
-function App() {
+// 페이지 임포트
+import IntroPage from './pages/IntroPage';
+import ProductListPage from './pages/ProductListPage';
+import ProductDetailPage from './pages/ProductDetailPage';
+import PaymentPage from './pages/PaymentPage';
+import ResultPage from './pages/ResultPage';
+
+// 타임아웃 감지를 위해 내부 컴포넌트 분리
+const AppContent = () => {
+  useIdleTimer(30000); // 30초 타임아웃 적용
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      <Routes>
+        <Route path="/" element={<IntroPage />} />
+        <Route path="/list" element={<ProductListPage />} />
+        <Route path="/detail/:id" element={<ProductDetailPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/result" element={<ResultPage />} />
+      </Routes>
   );
-}
+};
+
+const App = () => {
+  return (
+      <OrderProvider>
+        <BrowserRouter>
+          <AppContent />
+        </BrowserRouter>
+      </OrderProvider>
+  );
+};
 
 export default App;
