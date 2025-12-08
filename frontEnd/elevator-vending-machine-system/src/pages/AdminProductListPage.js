@@ -38,7 +38,7 @@ const AdminProductListPage = () => {
     // 수정 페이지 이동 핸들러 (이벤트 버블링 방지)
     const handleEdit = (e, id) => {
         e.stopPropagation();
-        navigate(`/edit/${id}`); // 라우트 경로 주의 (/adminForm/:id 인지 /edit/:id 인지 App.js 확인)
+        navigate(`/adminForm/${id}`); // 라우트 경로 주의 (/adminForm/:id 인지 /edit/:id 인지 App.js 확인)
     };
 
     return (
