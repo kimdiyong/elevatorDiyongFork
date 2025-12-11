@@ -47,7 +47,7 @@ const AdminProductListPage = () => {
                 <h2>상품 관리</h2>
                 <div>
                     <button
-                        onClick={() => navigate('/create')} // 라우트 경로 주의 (/adminForm 인지 /create 인지 App.js 확인)
+                        onClick={() => navigate('/adminForm')} // 라우트 경로 주의 (/adminForm 인지 /create 인지 App.js 확인)
                         style={{ padding: '10px 20px', backgroundColor: '#2ecc71', color: 'white', border: 'none', borderRadius: '5px', marginRight: '10px', cursor: 'pointer' }}
                     >
                         + 신규 상품 등록

@@ -45,6 +45,7 @@ public class PaymentService {
 
         // 3. 결제 수단별 로직 처리 (Mocking)
         int change = 0; // 거스름돈
+        int receivedAmount = 0; //찬범추가
 
         if (request.getMethod() == PaymentMethod.CASH) {
 
@@ -60,6 +61,7 @@ public class PaymentService {
             // 🔽 ② 금액 누적
             // ================================
             currentInsertedCashAmount += request.getInsertedAmount();
+            receivedAmount = currentInsertedCashAmount;//찬범추가
 
             // ================================
             // 🔽 ③ 금액 부족 → 추가 투입 요청
@@ -79,7 +81,7 @@ public class PaymentService {
 
             // 결제 로그 저장
             savePaymentLog(product, request, PaymentStatus.SUCCESS, null);
-
+            
             // 영수증 출력 여부 체크
             if (request.isNeedReceipt()) {
                 printReceipt(product, product.getPrice(), change);
@@ -92,10 +94,17 @@ public class PaymentService {
             log.info("📢 [하드웨어 신호 전송] 상품명: {}, 위치: {} -> 상품이 출고되었습니다.",
                     product.getName(), product.getLocationCode());
             log.info("==================================================");
-
-            // 실제 하드웨어 명령 전송 가능 시
-            // embeddedClientService.sendDispenseCommand(product);
-
+            
+            
+          //찬범수정  노트북2로 JSON 영수증 데이터 전송 추가
+            embeddedClientService.sendReceiptJson(
+                    product.getName(),
+                    product.getLocationCode(),
+                    product.getPrice(),
+                    receivedAmount,
+                    change
+            );
+          
             // 세션 초기화
             currentCashProductId = null;
             currentInsertedCashAmount = 0;
@@ -111,6 +120,7 @@ public class PaymentService {
             // 카드 결제: PG사 승인 요청 (SID-015 Mocking)
             // 실제로는 외부 API를 호출하지만, 여기서는 성공으로 가정
             log.info("PG사 승인 요청... [카드 번호: ****-****-****-2025, 금액: {}]", product.getPrice());
+            receivedAmount = product.getPrice(); //찬범수정
         }
 
         // 4. 상품 출고 및 잔액 반환(COM-08 요청사항: 텍스트 출력으로 대체)
@@ -138,7 +148,14 @@ public class PaymentService {
         if (request.isNeedReceipt()) {
             printReceipt(product, request, change);
         }
-
+      //찬범수정 — 카드 결제 시에도 JSON 영수증 데이터를 노트북2로 전송
+        embeddedClientService.sendReceiptJson(
+                product.getName(),
+                product.getLocationCode(),
+                product.getPrice(),
+                receivedAmount,
+                change
+        );
         return new PaymentDto.Response(true, "결제가 완료되었습니다. 상품을 꺼내주세요.", change);
     }
 
@@ -173,7 +190,14 @@ public class PaymentService {
         if (needReceipt) {
             printReceipt(product, price, change);
         }
-
+      //찬범수정 - confirmPayment에서도 노트북2로 전송
+        embeddedClientService.sendReceiptJson(
+                product.getName(),
+                product.getLocationCode(),
+                price,
+                currentInsertedCashAmount,
+                change
+        );
         // 세션 초기화
         currentCashProductId = null;
         currentInsertedCashAmount = 0;
